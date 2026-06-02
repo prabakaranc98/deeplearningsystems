@@ -130,6 +130,87 @@ three questions:
 This prevents the common mistake: reaching for an advanced tool before
 proving the problem it solves.
 
+## Frontier Lab Skill Signals
+
+Public research-engineering and systems roles from OpenAI, Anthropic, and
+Google DeepMind point to the same pattern. Frontier labs value people who
+can turn ambiguous research ideas into measured, scalable systems. The
+job title may say research engineer, performance engineer, data
+infrastructure engineer, distributed systems engineer, or inference
+engineer, but the underlying skill shape is similar.
+
+This is not a hiring rubric. It is a learning signal for this repo.
+
+### What They Seem To Need
+
+| Skill Area | What It Means | How To Learn It Here |
+| --- | --- | --- |
+| Research engineering | Bridge theory and implementation; design experiments, build prototypes, scale the promising ones. | Reproduce a paper, implement the core idea, measure it, then write what changed and why. |
+| Measurement and evals | Build evals, graders, environments, and methodology that are reliable under noisy model behavior. | Create a small benchmark suite with variance, failure cases, and regression thresholds. |
+| Post-training and agents | Understand RL, RLHF/RLAIF, tool use, coding agents, computer-use tasks, and long-horizon behavior. | Build toy RL environments, agent task harnesses, and automatic graders before touching huge models. |
+| GPU performance | Understand kernels, memory bandwidth, tensor cores, profiling, fusion, low precision, and attention kernels. | Write CUDA/Triton kernels, profile with Nsight or PyTorch tools, compare against framework baselines. |
+| Framework internals | Know PyTorch/JAX runtime behavior, autograd, custom ops, `torch.compile`, XLA, and graph breaks. | Replace a framework op with a custom op, compile the model, and explain where compilation helps or fails. |
+| Distributed training | Scale across GPUs with DDP, FSDP/ZeRO, tensor parallelism, pipeline parallelism, collectives, and checkpointing. | Run single-GPU first, then DDP, then sharded training; measure MFU, communication, memory, and resume correctness. |
+| Data infrastructure | Build dataset APIs, sharding, validation, reproducibility, inspection tools, and fast loading at GPU scale. | Make a dataloader benchmark, add rank-aware sampling, and test whether data stalls slow global training. |
+| Inference systems | Optimize serving across kernels, memory, network, batching, KV cache, and distributed execution. | Compare a simple serving loop with vLLM-like batching concepts; measure time to first token and inter-token latency. |
+| Reliability and observability | Detect bad nodes, stragglers, bottlenecks, failed jobs, and correctness drift in large systems. | Add traces, logs, health checks, checkpoint drills, and failure/restart experiments. |
+| Safety and responsibility | Treat capability, alignment, misuse, robustness, and evaluation as part of the system, not as afterthoughts. | Add eval notes for failure modes, misuse boundaries, and model behavior that would block deployment. |
+
+### The Pattern
+
+At frontier scale, the important work often sits between categories:
+
+- A new model idea becomes useful only if it can be trained efficiently.
+- A faster kernel matters only if it improves end-to-end throughput.
+- An eval matters only if it is reliable enough to steer a training run.
+- A data pipeline matters only if it prevents GPU-scale stalls and keeps
+  experiments reproducible.
+- A distributed training system matters only if it survives failures and
+  gives researchers usable feedback.
+- An inference optimization matters only if it improves latency,
+  throughput, quality, or cost in the real serving path.
+
+The lesson for this repo: every project should connect an idea to a
+measurement and a system constraint. Do not only implement softmax. Ask:
+how fast is it, what memory path limits it, how does it integrate with
+autograd, can the compiler fuse around it, does it matter in a model, and
+what breaks when it scales?
+
+### Essential Frontier-Lab Learning Projects
+
+Use these as north-star projects after the early curriculum modules:
+
+1. **Microkernel to model path**
+   Implement softmax or layer norm in Triton, verify correctness, profile
+   it, wrap it as a PyTorch op, and measure whether a tiny transformer
+   block improves end-to-end.
+2. **Compiler and graph path**
+   Take an eager PyTorch model, run `torch.compile`, inspect graph breaks,
+   measure compile overhead versus runtime savings, and document when
+   CUDA Graphs would help.
+3. **Data-at-scale path**
+   Build a dataset interface with sharding, validation, deterministic
+   resume, and a benchmark that shows whether the GPU is input-starved.
+4. **Distributed training path**
+   Train a small transformer with DDP, then FSDP/ZeRO-style sharding.
+   Track throughput, memory, communication, checkpoint size, and resume
+   correctness.
+5. **Post-training and eval path**
+   Build a toy agent/RL environment with an automatic grader. Measure
+   reward variance, failure modes, and whether the eval actually
+   distinguishes model behavior.
+6. **Inference path**
+   Serve a small decoder model. Measure prefill latency, decode latency,
+   KV-cache memory, batching effects, and cancellation/streaming behavior.
+7. **Reliability path**
+   Add observability and failure drills: kill a worker, resume from a
+   checkpoint, detect a slow data worker, and report lost work.
+
+If you can complete these projects with clear measurements and readable
+writeups, you will have learned the practical core that frontier labs
+keep signaling: research ideas, scalable implementation, performance,
+evaluation, and reliability are one connected discipline.
+
 ## 1. Hardware and Interconnect
 
 What matters:
@@ -448,6 +529,14 @@ make the framework integration correct, then scale, then serve.
 These are the public anchors used to shape this map:
 
 - OpenAI Triton introduction: https://openai.com/index/triton/
+- OpenAI Frontier Evals & Environments role: https://openai.com/careers/research-engineer-frontier-evals-and-environments-san-francisco/
+- OpenAI Platform Systems role: https://openai.com/careers/software-engineer-platform-systems-san-francisco/
+- OpenAI Training Performance Engineer role: https://openai.com/careers/training-performance-engineer-san-francisco/
+- OpenAI Data Infrastructure role: https://openai.com/careers/software-engineer-data-infrastructure-research-san-francisco/
+- OpenAI Inference GPU Enablement role: https://openai.com/careers/software-engineer-inference-amd-gpu-enablement-san-francisco/
+- Anthropic Research Engineer, Reinforcement Learning role: https://www.anthropic.com/careers/jobs/4613568008
+- Anthropic GPU Performance Engineer role: https://www.anthropic.com/careers/jobs/4926227008
+- Google DeepMind careers role descriptions: https://deepmind.google/careers/
 - Triton documentation: https://triton-lang.org/
 - CMU 10-414/714 Deep Learning Systems: https://dlsyscourse.org/lectures/
 - Stanford CS149 Parallel Computing: https://gfxcourses.stanford.edu/cs149/
